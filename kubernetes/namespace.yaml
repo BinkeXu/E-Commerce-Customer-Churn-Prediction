@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: churn-prediction
+  labels:
+    name: churn-prediction
+    environment: production
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: churn-prediction
+  name: churn-prediction-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: churn-prediction-role-binding
+  namespace: churn-prediction
+subjects:
+- kind: ServiceAccount
+  name: churn-prediction-sa
+  namespace: churn-prediction
+roleRef:
+  kind: Role
+  name: churn-prediction-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: churn-prediction-sa
+  namespace: churn-prediction

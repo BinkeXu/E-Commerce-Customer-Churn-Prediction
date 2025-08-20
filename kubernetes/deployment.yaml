@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: churn-prediction-api
+  labels:
+    app: churn-prediction-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: churn-prediction-api
+  template:
+    metadata:
+      labels:
+        app: churn-prediction-api
+    spec:
+      containers:
+      - name: churn-api
+        image: churn-prediction:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: models-volume
+          mountPath: /app/final_models
+          readOnly: true
+      volumes:
+      - name: models-volume
+        persistentVolumeClaim:
+          claimName: models-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: churn-prediction-service
+spec:
+  selector:
+    app: churn-prediction-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: models-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

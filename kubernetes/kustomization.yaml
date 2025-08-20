@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: churn-prediction
+
+resources:
+- namespace.yaml
+- deployment.yaml
+- ingress.yaml
+
+commonLabels:
+  app: churn-prediction
+  environment: production
+
+images:
+- name: churn-prediction
+  newTag: latest
+
+configMapGenerator:
+- name: app-config
+  literals:
+  - ENVIRONMENT=production
+  - LOG_LEVEL=info
+  - API_VERSION=v1.0.0
+
+secretGenerator:
+- name: app-secrets
+  literals:
+  - API_KEY=your-secret-api-key-here
+  - DATABASE_URL=your-database-url-here

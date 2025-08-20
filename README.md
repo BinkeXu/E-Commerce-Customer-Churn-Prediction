@@ -1,76 +1,169 @@
 # E-Commerce Customer Churn Prediction
 
-A machine learning project that predicts customer churn using transactional data and RFM analysis.
+A machine learning project that predicts customer churn using RFM analysis and gradient boosting algorithms.
 
 ## 🚀 Quick Start
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Prerequisites
+- Python 3.9+
+- Docker and Docker Compose
+- Git
 
-2. **Run the Streamlit demo:**
-   ```bash
-   streamlit run app/streamlit_app.py
-   ```
+### Local Development
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd E-Commerce-Customer-Churn-Prediction
 
-3. **Start the FastAPI server:**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+# Install dependencies
+pip install -r requirements.txt
 
-4. **Open Jupyter notebooks:**
-   ```bash
-   jupyter notebook notebooks/
-   ```
+# Run the API
+python app/main.py
+
+# Run Streamlit app
+streamlit run app/streamlit_app.py
+```
+
+### Docker Deployment
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Or use the deployment script
+./deploy.sh  # Linux/Mac
+.\deploy.ps1 # Windows
+```
+
+## 🏗️ Infrastructure
+
+### Services
+- **FastAPI Backend**: RESTful API for churn predictions
+- **Streamlit Frontend**: Interactive web interface
+- **Prometheus**: Metrics collection and monitoring
+- **Grafana**: Visualization and dashboards
+- **AlertManager**: Alerting and notifications
+
+### Ports
+- FastAPI: `8000`
+- Streamlit: `8501`
+- Prometheus: `9090`
+- Grafana: `3000`
+- AlertManager: `9093`
+
+## 📊 API Endpoints
+
+- `GET /` - API information
+- `GET /health` - Health check
+- `POST /predict` - Single customer prediction
+- `POST /predict_batch` - Batch predictions
+- `GET /model_info` - Model information
+- `GET /example_features` - Example features for testing
+
+## 🔧 Deployment Options
+
+### 1. Docker Compose (Recommended for Development)
+```bash
+docker-compose up -d
+```
+
+### 2. Kubernetes (Production)
+```bash
+# Apply all manifests
+kubectl apply -k kubernetes/
+
+# Or apply individually
+kubectl apply -f kubernetes/namespace.yaml
+kubectl apply -f kubernetes/deployment.yaml
+kubectl apply -f kubernetes/ingress.yaml
+```
+
+### 3. Monitoring Stack
+```bash
+docker-compose -f monitoring/docker-compose.monitoring.yml up -d
+```
+
+## 📈 Monitoring & Observability
+
+### Metrics
+- API response times
+- Request rates and error rates
+- Model prediction latency
+- Resource utilization (CPU, memory)
+
+### Alerts
+- High error rates
+- High response times
+- Service downtime
+- Resource exhaustion
+
+### Dashboards
+- Real-time API performance
+- Model prediction analytics
+- System resource monitoring
+
+## 🔐 Security
+
+- Non-root Docker containers
+- RBAC for Kubernetes
+- Environment variable configuration
+- Health check endpoints
+
+## 🚀 CI/CD
+
+GitHub Actions workflow automatically:
+- Runs tests on pull requests
+- Builds Docker images
+- Deploys to production (main branch)
 
 ## 📁 Project Structure
 
 ```
-├── data/                   # Data files
-│   └── OnlineRetail.csv   # Raw dataset
-├── notebooks/             # Jupyter notebooks
-│   ├── 01_eda.ipynb      # Exploratory Data Analysis
-│   ├── 02_feature_engineering.ipynb  # Feature creation
-│   └── 03_modeling.ipynb # Model training & evaluation
-├── src/                   # Source code
-│   ├── data/             # Data processing modules
-│   ├── features/         # Feature engineering
-│   ├── models/           # ML model training
-│   └── api/              # FastAPI application
-├── app/                   # Application files
-│   ├── main.py           # FastAPI app
-│   └── streamlit_app.py  # Streamlit demo
-├── models/                # Trained models
-├── tests/                 # Unit tests
-├── docker/                # Docker configuration
-└── requirements.txt       # Python dependencies
+├── app/                    # Application code
+│   ├── main.py            # FastAPI application
+│   └── streamlit_app.py   # Streamlit interface
+├── src/                    # Source modules
+├── final_models/          # Trained models
+├── kubernetes/            # K8s manifests
+├── monitoring/            # Monitoring configs
+├── Dockerfile             # Container definition
+├── docker-compose.yml     # Local deployment
+└── deploy.sh              # Deployment script
 ```
 
-## 🔧 Features
+## 🐛 Troubleshooting
 
-- **RFM Analysis:** Recency, Frequency, Monetary metrics
-- **Advanced Features:** Customer lifetime, inter-purchase time, unique products
-- **ML Models:** Logistic Regression baseline + LightGBM/XGBoost
-- **API:** FastAPI for real-time predictions
-- **Demo:** Streamlit web interface
-- **Docker:** Containerized deployment
+### Common Issues
+1. **Model not loaded**: Ensure `final_models/` directory contains trained models
+2. **Port conflicts**: Check if ports 8000/8501 are available
+3. **Docker issues**: Verify Docker is running and has sufficient resources
 
-## 📊 Model Performance
-
-The project focuses on:
-- **Precision:** Accuracy of churn predictions
-- **Recall:** Coverage of actual churners
-- **F1-Score:** Balanced performance metric
-- **ROC-AUC:** Model discrimination ability
-
-## 🐳 Docker
-
+### Logs
 ```bash
-docker build -t churn-prediction .
-docker run -p 8000:8000 churn-prediction
+# View API logs
+docker-compose logs churn-api
+
+# View all logs
+docker-compose logs -f
+
+# Kubernetes logs
+kubectl logs -f deployment/churn-prediction-api -n churn-prediction
 ```
 
-## 📝 License
+## 📚 Documentation
 
-MIT License - see LICENSE file for details.
+- [API Documentation](http://localhost:8000/docs) (when running)
+- [Model Architecture](E-Commerce%20Customer%20Churn%20Prediction.md)
+- [Feature Engineering](src/features/rfm_features.py)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.

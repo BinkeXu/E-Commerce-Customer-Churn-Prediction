@@ -11,7 +11,70 @@ import sys
 import os
 
 # Add src to path for imports
+sys.path.append('/app/src')
 sys.path.append('src')
+
+def show_sample_dashboard_data():
+    """Show sample dashboard data when real data is not available."""
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 📊 Sample Data Statistics")
+        st.write("**Total Transactions:** 541,909")
+        st.write("**Unique Customers:** 4,372")
+        st.write("**Date Range:** 2010-12-01 to 2011-12-09")
+        st.write("**Total Revenue:** £8,349,500.00")
+    
+    with col2:
+        st.markdown("### 🎯 Sample Churn Distribution")
+        # Sample churn data
+        churn_data = {'Active': 3500, 'Churned': 872}
+        fig = px.pie(
+            values=list(churn_data.values()),
+            names=list(churn_data.keys()),
+            title="Customer Churn Status (Sample)",
+            color_discrete_sequence=['#00ff88', '#ff6b6b']
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Sample RFM Distribution
+    st.markdown("### 📊 Sample RFM Metrics Distribution")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        # Sample monetary distribution
+        np.random.seed(42)
+        sample_monetary = np.random.exponential(500, 1000)
+        fig = px.histogram(
+            x=sample_monetary,
+            nbins=30,
+            title="Monetary Distribution (Sample)",
+            color_discrete_sequence=['#667eea']
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Sample frequency distribution
+        sample_frequency = np.random.poisson(5, 1000)
+        fig = px.histogram(
+            x=sample_frequency,
+            nbins=30,
+            title="Frequency Distribution (Sample)",
+            color_discrete_sequence=['#764ba2']
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col3:
+        # Sample recency distribution
+        sample_recency = np.random.exponential(60, 1000)
+        fig = px.histogram(
+            x=sample_recency,
+            nbins=30,
+            title="Recency Distribution (Sample)",
+            color_discrete_sequence=['#f093fb']
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 # Page configuration
 st.set_page_config(
@@ -79,7 +142,7 @@ with st.sidebar:
     
     if st.session_state.api_connected:
         try:
-            response = requests.get("http://localhost:8000/health")
+            response = requests.get("http://churn-api:8000/health")
             if response.status_code == 200:
                 st.success("✅ API Connected")
                 st.metric("Model Status", "Loaded" if response.json()["model_loaded"] else "Not Loaded")
@@ -125,71 +188,9 @@ if page == "🏠 Dashboard":
     # Data overview
     st.markdown("## 📈 Dataset Overview")
     
-    try:
-        # Load sample data for visualization
-        from src.data.loader import DataLoader
-        
-        loader = DataLoader()
-        raw_data, customer_data = loader.get_clean_data()
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 📊 Raw Data Statistics")
-            st.write(f"**Total Transactions:** {len(raw_data):,}")
-            st.write(f"**Unique Customers:** {customer_data['CustomerID'].nunique():,}")
-            st.write(f"**Date Range:** {raw_data['InvoiceDate'].min().strftime('%Y-%m-%d')} to {raw_data['InvoiceDate'].max().strftime('%Y-%m-%d')}")
-            st.write(f"**Total Revenue:** £{raw_data['TotalAmount'].sum():,.2f}")
-        
-        with col2:
-            st.markdown("### 🎯 Churn Distribution")
-            churn_counts = customer_data['Churned'].value_counts()
-            fig = px.pie(
-                values=churn_counts.values,
-                names=['Active', 'Churned'],
-                title="Customer Churn Status",
-                color_discrete_sequence=['#00ff88', '#ff6b6b']
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # RFM Distribution
-        st.markdown("### 📊 RFM Metrics Distribution")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            fig = px.histogram(
-                customer_data, 
-                x='TotalSpent', 
-                nbins=30,
-                title="Monetary Distribution",
-                color_discrete_sequence=['#667eea']
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        
-        with col2:
-            fig = px.histogram(
-                customer_data, 
-                x='TotalInvoices', 
-                nbins=30,
-                title="Frequency Distribution",
-                color_discrete_sequence=['#764ba2']
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        
-        with col3:
-            fig = px.histogram(
-                customer_data, 
-                x='DaysSinceLastPurchase', 
-                nbins=30,
-                title="Recency Distribution",
-                color_discrete_sequence=['#f093fb']
-            )
-            st.plotly_chart(fig, use_container_width=True)
-            
-    except Exception as e:
-        st.error(f"Error loading data: {str(e)}")
-        st.info("Please ensure the data file is available and the modules are properly set up.")
+    # Show sample dashboard data (real data loading disabled for now)
+    st.info("📊 Showing sample dashboard data")
+    show_sample_dashboard_data()
 
 elif page == "🔮 Single Prediction":
     st.markdown("## 🔮 Single Customer Churn Prediction")
@@ -197,7 +198,7 @@ elif page == "🔮 Single Prediction":
     # API connection status
     if st.button("🔌 Connect to API", key="connect_api"):
         try:
-            response = requests.get("http://localhost:8000/health")
+            response = requests.get("http://churn-api:8000/health")
             if response.status_code == 200:
                 st.session_state.api_connected = True
                 st.success("✅ Successfully connected to API!")
@@ -255,7 +256,7 @@ elif page == "🔮 Single Prediction":
                 }
                 
                 # Make prediction
-                response = requests.post("http://localhost:8000/predict", json=features)
+                response = requests.post("http://churn-api:8000/predict", json=features)
                 
                 if response.status_code == 200:
                     prediction = response.json()
@@ -311,7 +312,7 @@ elif page == "📊 Batch Analysis":
     
     if not st.session_state.api_connected:
         st.warning("🔌 Please connect to the API first from the Single Prediction page.")
-        return
+        st.stop()
     
     st.markdown("### 📁 Upload Customer Data")
     
@@ -350,7 +351,7 @@ elif page == "📊 Batch Analysis":
                     customers.append(customer)
                 
                 # Make batch prediction
-                response = requests.post("http://localhost:8000/predict_batch", json=customers)
+                response = requests.post("http://churn-api:8000/predict_batch", json=customers)
                 
                 if response.status_code == 200:
                     results = response.json()
@@ -414,11 +415,11 @@ elif page == "📈 Model Performance":
     
     if not st.session_state.api_connected:
         st.warning("🔌 Please connect to the API first to view model performance.")
-        return
+        st.stop()
     
     try:
         # Get model info
-        response = requests.get("http://localhost:8000/model_info")
+        response = requests.get("http://churn-api:8000/model_info")
         
         if response.status_code == 200:
             model_info = response.json()

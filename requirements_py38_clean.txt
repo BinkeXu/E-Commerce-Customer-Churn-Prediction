@@ -1,0 +1,16 @@
+# Python 3.8 Compatible Requirements
+fastapi==0.95.2
+uvicorn==0.22.0
+pandas==1.5.3
+numpy==1.24.3
+scikit-learn==1.2.2
+lightgbm==3.3.5
+xgboost==1.7.6
+streamlit==1.22.0
+jupyter==1.0.0
+matplotlib==3.7.1
+seaborn==0.12.2
+plotly==5.14.1
+python-multipart==0.0.6
+pydantic==1.10.7
+joblib==1.2.0
