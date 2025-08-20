@@ -105,6 +105,8 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+summary.txt
+project_summary.json
 
 # mypy
 .mypy_cache/

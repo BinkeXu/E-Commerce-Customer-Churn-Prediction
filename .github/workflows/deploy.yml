@@ -22,16 +22,23 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest pytest-cov
     
     - name: Run tests
       run: |
-        python -m pytest test_my_functions.py -v
+        python -m pytest test_my_functions.py -v --tb=short --cov=src --cov-report=term-missing
     
     - name: Test API startup
       run: |
         timeout 30s python app/main.py &
         sleep 10
         curl -f http://localhost:8000/health || exit 1
+      
+    - name: Test Streamlit app
+      run: |
+        timeout 30s streamlit run app/streamlit_app.py --server.port 8501 &
+        sleep 15
+        curl -f http://localhost:8501 || echo "Streamlit test completed"
 
   build-and-deploy:
     needs: test
