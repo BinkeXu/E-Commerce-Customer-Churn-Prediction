@@ -25,10 +25,28 @@ python app/main.py
 streamlit run app/streamlit_app.py
 ```
 
+## 📸 Application Screenshots
+
+### 🏠 Dashboard
+![Dashboard](img/dashboard.jpg)
+
+### 🔮 Single Prediction
+![Single Prediction](img/prediction.jpg)
+
+### 📈 Model Performance
+![Model Performance](img/model%20performance.jpg)
+
+###  API Endpoints
+![Model Performance](img/API.jpg)
+
 ### Docker Deployment
 ```bash
 # Build and run with Docker Compose
 docker-compose up -d
+
+# Rbuild and restart containers
+docker-compose down
+docker-compose build --no-cache
 
 # Or use the deployment script
 ./deploy.sh  # Linux/Mac

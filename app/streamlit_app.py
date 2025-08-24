@@ -90,21 +90,21 @@ st.markdown("""
     .main-header {
         font-size: 3rem;
         font-weight: 700;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #52c45e;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 2rem;
     }
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #52c45e;
         padding: 1rem;
         border-radius: 10px;
         color: white;
         text-align: center;
     }
     .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #52c45e;
         border: none;
         border-radius: 25px;
         color: white;
@@ -466,12 +466,13 @@ elif page == "📈 Model Performance":
                 'Importance': np.random.rand(len(model_info['feature_names']))
             }).sort_values('Importance', ascending=True)
             
-            fig = px.barh(
+            fig = px.bar(
                 feature_importance,
                 x='Importance',
                 y='Feature',
                 title="Feature Importance (Mock Data)",
-                color_discrete_sequence=['#667eea']
+                color_discrete_sequence=['#667eea'],
+                orientation='h'
             )
             st.plotly_chart(fig, use_container_width=True)
             
