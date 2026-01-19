@@ -1,0 +1,53 @@
+
+version: 2
+
+models:
+  - name: stg_transactions
+    description: Cleaned transaction data
+    columns:
+      - name: CustomerID
+        tests:
+          - not_null
+      - name: InvoiceNo
+        tests:
+          - not_null
+      - name: TotalAmount
+        tests:
+          - not_null
+
+  - name: int_customer_rfm
+    description: Intermediate RFM metrics
+    columns:
+      - name: CustomerID
+        tests:
+          - unique
+          - not_null
+      - name: Recency
+        tests:
+          - not_null
+      - name: Frequency
+        tests:
+          - not_null
+      - name: Monetary
+        tests:
+          - not_null
+
+  - name: fct_churn_features
+    description: Final features including labels and scores
+    columns:
+      - name: CustomerID
+        tests:
+          - unique
+          - not_null
+      - name: Churned
+        tests:
+          - not_null
+      - name: RecencyScore
+        tests:
+          - not_null
+      - name: FrequencyScore
+        tests:
+          - not_null
+      - name: MonetaryScore
+        tests:
+          - not_null

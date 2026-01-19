@@ -1,0 +1,9 @@
+
+version: 2
+
+sources:
+  - name: ecommerce
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: raw_ecommerce
+    tables:
+      - name: OnlineRetail

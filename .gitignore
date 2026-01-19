@@ -76,11 +76,19 @@ data/raw/
 data/processed/
 data/external/
 
-# Model files (if you want to exclude them)
+# Model files
 *.pkl
 *.joblib
-models/
+!dbt/models/
+/models/
 final_models/
+
+# dbt
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/dbt_modules/
+.user.yml
 
 # Docker
 .dockerignore
