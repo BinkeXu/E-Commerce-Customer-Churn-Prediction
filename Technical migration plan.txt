@@ -1,0 +1,48 @@
+This plan outlines the technical migration of the E-Commerce Customer Churn Prediction project to a BigQuery and dbt Cloud architecture. The goal is to move data transformation logic from local Python scripts to a scalable cloud environment while maintaining security and Docker functionality.
+
+### **Phase 1: Infrastructure and Environment Setup**
+
+The infrastructure must be configured to support a cloud-native workflow without recurring costs.
+
+* **BigQuery Sandbox**: Initialize a Google Cloud project in Sandbox mode to gain 10 GB of free storage and 1 TB of monthly query processing.
+* **Data Ingestion**: Manually upload the `OnlineRetail.csv` file to a new BigQuery dataset named `raw_ecommerce`. This replaces the initial local file read in `loader.py`.
+* **dbt Cloud**: Connect a free dbt Cloud account to the existing GitHub repository. Configure the connection to BigQuery using a Service Account JSON key.
+
+### **Phase 2: Security and Secret Management**
+
+Strict protocols are required to prevent the exposure of credentials in public repositories.
+
+* **Local Storage**: Store all Google Cloud Service Account JSON keys in a local directory named `secrets/`.
+* **Git Protection**: Update the `.gitignore` file to include `secrets/`, `*.json`, and `.env` to ensure these files are never tracked.
+* **Docker Integration**: Modify `docker-compose.yml` to use a volume mount for the `secrets/` directory. This allows the container to access the key at `/app/secrets/google-key.json` without baking the secret into the image.
+* **Environment Variables**: Use a `.env` file to set `GOOGLE_APPLICATION_CREDENTIALS`. This variable must point to the mounted key path inside the container.
+
+### **Phase 3: Transformation Migration (Python to SQL)**
+
+The logic currently residing in the `src/` directory will be migrated to dbt models.
+
+* **Staging Layer**: Create `stg_transactions.sql` to replicate the `clean_data` logic from `loader.py`. This includes filtering for null `CustomerID`, removing cancelled invoices, and ensuring `Quantity` and `UnitPrice` are greater than zero.
+* **Intermediate Layer**: Create `int_customer_rfm.sql` to handle the calculations currently performed in `rfm_features.py`. This includes calculating Recency, Frequency, and Monetary metrics using SQL aggregations.
+* **Final Layer**: Create `fct_churn_features.sql` to implement the 90-day inactivity logic from `get_churn_labels` and the 1–5 scoring logic from `_create_rfm_scores` using BigQuery's `NTILE(5)` function.
+
+### **Phase 4: Application Refactoring**
+
+The Python application must be updated to serve as a consumer of the cloud data.
+
+* **Data Loader Update**: Refactor `loader.py` to remove local CSV loading. Implement a method using the `google-cloud-bigquery` library to fetch the final `fct_churn_features` table directly into a DataFrame.
+* **Feature Engineering Update**: Deprecate the calculation methods in `rfm_features.py`. The class should now only handle final data formatting for the XGBoost model.
+* **Dependencies**: Add `google-cloud-bigquery` and `pandas-gbq` to `requirements.txt`.
+
+### **Phase 5: Validation and CI/CD**
+
+* **dbt Testing**: Add schema tests in dbt to ensure no null values exist in the `CustomerID` or `Churned` columns of the final model.
+* **GitHub Actions**: Update `deploy.yml` to include a dbt build step using GitHub Secrets to store the necessary Service Account credentials for the test environment.
+
+### **Technical Requirements Checklist**
+
+| Component | Requirement |
+| --- | --- |
+| **Security** | Zero JSON keys tracked in Git. |
+| **Orchestration** | Docker containers must mount secrets as read-only volumes. |
+| **Data Integrity** | dbt models must accurately replicate previous Python cleaning logic. |
+| **Performance** | Final features must be pre-calculated in BigQuery to minimize API latency. |

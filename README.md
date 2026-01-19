@@ -1,28 +1,71 @@
 # E-Commerce Customer Churn Prediction
 
-A machine learning project that predicts customer churn using RFM analysis and gradient boosting algorithms.
+A machine learning project that predicts customer churn using RFM analysis and gradient boosting algorithms. The system uses a modern data stack with **BigQuery** for data warehousing and **dbt** for transformation.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.9+
 - Docker and Docker Compose
+- Google Cloud Service Account Key (for BigQuery access)
 - Git
 
-### Local Development
+### Setup & Installation
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd E-Commerce-Customer-Churn-Prediction
+   ```
+
+2. **Configure Credentials**
+   Place your Google Cloud Service Account key in `secrets/google-key.json`.
+   ```bash
+   mkdir secrets
+   # copy your key file here
+   ```
+
+3. **Initialize Infrastructure (First Run Only)**
+   Creates BigQuery datasets and uploads the initial CSV data.
+   ```bash
+   pip install google-cloud-bigquery pandas-gbq
+   python scripts/setup_bigquery.py
+   ```
+
+4. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   pip install dbt-bigquery
+   ```
+
+### 🏃 Running the Pipeline
+
+#### 1. Data Transformation (dbt)
+Build the data models (Staging -> Intermediate -> Marts) in BigQuery:
+```powershell
+.\run_dbt.bat
+```
+
+#### 2. Run the Application (Local)
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd E-Commerce-Customer-Churn-Prediction
+# Set environment variables for local testing
+$env:GCP_PROJECT_ID="airy-web-484800-u5"
+$env:GOOGLE_APPLICATION_CREDENTIALS="secrets\google-key.json"
 
-# Install dependencies
-pip install -r requirements.txt
+# Run tests/verification
+python test_my_functions.py
 
-# Run the API
+# Run API
 python app/main.py
 
-# Run Streamlit app
+# Run Streamlit Dashboard
 streamlit run app/streamlit_app.py
+```
+
+### 🐳 Docker Deployment
+Build and run the full stack (API + Dashboard) using Docker Compose. The configuration is already set up to mount your credentials.
+
+```bash
+docker-compose up --build
 ```
 
 ## 📸 Application Screenshots
@@ -37,142 +80,53 @@ streamlit run app/streamlit_app.py
 ![Model Performance](img/model%20performance.jpg)
 
 ###  API Endpoints
-![Model Performance](img/API.jpg)
+![API Endpoints](img/API.jpg)
 
-### Docker Deployment
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
+---
 
-# Rbuild and restart containers
-docker-compose down
-docker-compose build --no-cache
+## 🏗️ Architecture
 
-# Or use the deployment script
-./deploy.sh  # Linux/Mac
-.\deploy.ps1 # Windows
-```
+### Data Stack
+- **Source**: `raw_ecommerce` (BigQuery Dataset)
+- **Transformation**: `dbt` (SQL models for cleaning, RFM calculation, and churn labeling)
+- **Storage**: `ecommerce_churn` (Final features in BigQuery)
 
-## 🏗️ Infrastructure
-
-### Services
-- **FastAPI Backend**: RESTful API for churn predictions
-- **Streamlit Frontend**: Interactive web interface
-- **Prometheus**: Metrics collection and monitoring
-- **Grafana**: Visualization and dashboards
-- **AlertManager**: Alerting and notifications
-
-### Ports
-- FastAPI: `8000`
-- Streamlit: `8501`
-- Prometheus: `9090`
-- Grafana: `3000`
-- AlertManager: `9093`
-
-## 📊 API Endpoints
-
-- `GET /` - API information
-- `GET /health` - Health check
-- `POST /predict` - Single customer prediction
-- `POST /predict_batch` - Batch predictions
-- `GET /model_info` - Model information
-- `GET /example_features` - Example features for testing
-
-## 🔧 Deployment Options
-
-### 1. Docker Compose (Recommended for Development)
-```bash
-docker-compose up -d
-```
-
-### 2. Kubernetes (Production)
-```bash
-# Apply all manifests
-kubectl apply -k kubernetes/
-
-# Or apply individually
-kubectl apply -f kubernetes/namespace.yaml
-kubectl apply -f kubernetes/deployment.yaml
-kubectl apply -f kubernetes/ingress.yaml
-```
-
-### 3. Monitoring Stack
-```bash
-docker-compose -f monitoring/docker-compose.monitoring.yml up -d
-```
-
-## 📈 Monitoring & Observability
-
-### Metrics
-- API response times
-- Request rates and error rates
-- Model prediction latency
-- Resource utilization (CPU, memory)
-
-### Alerts
-- High error rates
-- High response times
-- Service downtime
-- Resource exhaustion
-
-### Dashboards
-- Real-time API performance
-- Model prediction analytics
-- System resource monitoring
-
-## 🔐 Security
-
-- Non-root Docker containers
-- RBAC for Kubernetes
-- Environment variable configuration
-- Health check endpoints
-
-## 🚀 CI/CD
-
-GitHub Actions workflow automatically:
-- Runs tests on pull requests
-- Builds Docker images
-- Deploys to production (main branch)
+### App Stack
+- **FastAPI Backend**: Consumes pre-calculated features from BigQuery.
+- **Streamlit Frontend**: Interactive dashboard for churn analysis.
+- **Monitoring**: Prometheus + Grafana (optional).
 
 ## 📁 Project Structure
 
 ```
 ├── app/                    # Application code
-│   ├── main.py            # FastAPI application
-│   └── streamlit_app.py   # Streamlit interface
+├── dbt/                    # Data transformation models (SQL)
+│   ├── models/             
+│   │   ├── staging/        # Cleaning logic
+│   │   ├── intermediate/   # RFM logic
+│   │   └── marts/          # Final features
+├── scripts/                # Utility scripts (infra setup)
+├── secrets/                # Credentials (not tracked)
 ├── src/                    # Source modules
-├── final_models/          # Trained models
-├── kubernetes/            # K8s manifests
-├── monitoring/            # Monitoring configs
-├── Dockerfile             # Container definition
-├── docker-compose.yml     # Local deployment
-└── deploy.sh              # Deployment script
+│   ├── data/               # DataLoader (BigQuery)
+│   └── models/             # ML Model logic
+├── Dockerfile             
+└── docker-compose.yml      
 ```
 
-## 🐛 Troubleshooting
+## 📊 API Endpoints
 
-### Common Issues
-1. **Model not loaded**: Ensure `final_models/` directory contains trained models
-2. **Port conflicts**: Check if ports 8000/8501 are available
-3. **Docker issues**: Verify Docker is running and has sufficient resources
+- `GET /` - API information
+- `GET /health` - Health check (verifies Model & BQ connection)
+- `POST /predict` - Single customer prediction
+- `POST /predict_batch` - Batch predictions
 
-### Logs
-```bash
-# View API logs
-docker-compose logs churn-api
+## 🚀 CI/CD
 
-# View all logs
-docker-compose logs -f
-
-# Kubernetes logs
-kubectl logs -f deployment/churn-prediction-api -n churn-prediction
-```
-
-## 📚 Documentation
-
-- [API Documentation](http://localhost:8000/docs) (when running)
-- [Model Architecture](E-Commerce%20Customer%20Churn%20Prediction.md)
-- [Feature Engineering](src/features/rfm_features.py)
+GitHub Actions workflow (`deploy.yml`) automatically:
+1. **Running dbt tests**: Ensures data quality and schema validation in BigQuery.
+2. **Runs App tests**: Verifies Python application logic.
+3. **Builds & Deploys**: Docker images (on merge to main).
 
 ## 🤝 Contributing
 

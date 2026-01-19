@@ -6,8 +6,10 @@ services:
     environment:
       - ENVIRONMENT=production
       - LOG_LEVEL=info
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/google-key.json
     volumes:
       - ./final_models:/app/final_models:ro
+      - ./secrets:/app/secrets:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -22,8 +24,10 @@ services:
       - "8501:8501"
     environment:
       - ENVIRONMENT=production
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/google-key.json
     volumes:
       - ./final_models:/app/final_models:ro
+      - ./secrets:/app/secrets:ro
     command: ["streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
     restart: unless-stopped
     depends_on:

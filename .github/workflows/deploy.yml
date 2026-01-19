@@ -7,7 +7,32 @@ on:
     branches: [ main ]
 
 jobs:
+  dbt-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dbt
+      run: pip install dbt-bigquery
+      
+    - name: Create authentication key
+      run: echo "${{ secrets.GCP_SA_KEY }}" > /tmp/google-key.json
+      
+    - name: Run dbt tests
+      env:
+        GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      run: |
+        cd dbt
+        dbt deps
+        dbt build --profiles-dir .
+
   test:
+    needs: dbt-test
     runs-on: ubuntu-latest
     
     steps:
